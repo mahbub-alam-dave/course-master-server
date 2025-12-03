@@ -15,3 +15,18 @@ export const fetchRandomCourses = async () => {
     throw new Error(`Error fetching random courses: ${error.message}`);
   }
 };
+
+// Fetch single course by ID
+export const fetchCourseById = async (id) => {
+  try {
+    const courses = CourseCollection()
+    const course = await courses.findOne({ 
+      _id: id, 
+      status: 'published' 
+    }).lean();
+
+    return course;
+  } catch (error) {
+    throw new Error(`Error fetching course by ID: ${error.message}`);
+  }
+};
