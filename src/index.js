@@ -1,14 +1,21 @@
 import express from "express"
+import cors from "cors";
 import config from "./config/config.js";
 import { dbConnect } from "./helpers/dbConnect.js";
+import { authRoutes } from "./modules/authentication/auth.routes.js";
 
 const app = express();
-const port = config.port || 3000
+const port = config.port || 5000
 
 app.use(express.json());
 // app.use(express.urlencoded());
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:3000"],
+  credentials: true
+}));
 
-// app.use("/auth", )
+
+app.use("/api/auth", authRoutes)
 
 app.get("/", (req, res) => {
   res.send("🎓 Courser Master API is running...");
