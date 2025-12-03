@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { CourseCollection } from "./courses.model.js";
 
 
@@ -21,9 +22,9 @@ export const fetchCourseById = async (id) => {
   try {
     const courses = CourseCollection()
     const course = await courses.findOne({ 
-      _id: id, 
+      _id: new ObjectId(id), 
       status: 'published' 
-    }).lean();
+    });
 
     return course;
   } catch (error) {
