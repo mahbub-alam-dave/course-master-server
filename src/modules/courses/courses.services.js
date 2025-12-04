@@ -31,3 +31,54 @@ export const fetchCourseById = async (id) => {
     throw new Error(`Error fetching course by ID: ${error.message}`);
   }
 };
+
+// / Fetch all courses with pagination and filters
+export const fetchAllCourses = async ({ page, limit, category, level, search }) => {
+  try {
+    const skip = (page - 1) * limit;
+
+    // Build query filter
+    const filter = { status: 'published' };
+
+    if (category) {
+      filter.category = category;
+    }
+
+    if (level) {
+      filter.level = level;
+    }
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { shortDescription: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
+    }
+
+    // Fetch courses with pagination
+    const coursesCollection = CourseCollection()
+    const courses = await coursesCollection.find(filter)
+      .select('-sections -description') // Exclude heavy fields for list view
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Get total count for pagination
+    const totalCourses = await coursesCollection.countDocuments(filter);
+    const totalPages = Math.ceil(totalCourses / limit);
+
+    return {
+      courses,
+      currentPage: page,
+      totalPages,
+      totalCourses,
+      limit,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    };
+  } catch (error) {
+    throw new Error(`Error fetching courses: ${error.message}`);
+  }
+};
