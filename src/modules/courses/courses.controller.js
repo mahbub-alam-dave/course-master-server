@@ -1,4 +1,4 @@
-import { fetchCourseById, fetchRandomCourses } from "./courses.services.js";
+import { fetchAllCourses, fetchCourseById, fetchRandomCourses } from "./courses.services.js";
 
 export const getRandomCourses = async (req, res) => {
   try {
@@ -40,6 +40,39 @@ export const getCourseById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch course details',
+      error: error.message
+    });
+  }
+};
+
+// / Get all courses with pagination
+export const getAllCourses = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const category = req.query.category || '';
+    const level = req.query.level || '';
+    const search = req.query.search || '';
+
+    const result = await fetchAllCourses({ page, limit, category, level, search });
+
+    res.status(200).json({
+      success: true,
+      data: result.courses,
+      pagination: {
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        totalCourses: result.totalCourses,
+        limit: result.limit,
+        hasNextPage: result.hasNextPage,
+        hasPrevPage: result.hasPrevPage
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching all courses:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch courses',
       error: error.message
     });
   }
