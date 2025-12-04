@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import config from "../../config/config.js";
-import { createStripePaymentIntent } from "./payment.services.js";
+import { createStripePaymentIntent, processPaymentConfirmation } from "./payment.services.js";
 
 const stripe = new Stripe(config.stripeSecretKey);
 
@@ -36,6 +36,67 @@ export const createPaymentIntent = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to create payment intent',
+      error: error.message
+    });
+  }
+};
+
+
+// Confirm payment and create enrollment
+export const confirmPayment = async (req, res) => {
+  try {
+    const { paymentIntentId, courseId } = req.body;
+    const userId = req.user.id;
+    const userEmail = req.user.email;
+    const userName = req.user.name;
+
+    if (!paymentIntentId || !courseId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment Intent ID and Course ID are required'
+      });
+    }
+
+    // Verify payment with Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment has not been completed'
+      });
+    }
+
+    // Process payment and create enrollment
+    const result = await processPaymentConfirmation({
+      userId,
+      userName,
+      userEmail,
+      courseId,
+      paymentIntent
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment confirmed and enrollment created successfully',
+      data: {
+        payment: result.payment,
+        enrollment: result.enrollment
+      }
+    });
+  } catch (error) {
+    console.error('Error confirming payment:', error);
+    
+    if (error.message.includes('already enrolled')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to confirm payment',
       error: error.message
     });
   }
