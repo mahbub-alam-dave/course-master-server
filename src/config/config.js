@@ -10,6 +10,7 @@ const config = {
     githubSecret: process.env.GITHUB_CLIENT_SECRET,
     clientUrl: process.env.CLIENT_URL,
     jwtSecret: process.env.JWT_SECRET,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
 }
 
 export default config;
