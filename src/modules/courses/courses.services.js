@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { CourseCollection } from "./courses.model.js";
+import { CourseCollection } from "../../models/courses.js";
 
 
 export const fetchRandomCourses = async () => {

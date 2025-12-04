@@ -1,4 +1,5 @@
-import { enrollmentCollection } from "./enrollment.model.js";
+import { enrollmentCollection } from "../../models/enrollment.js";
+
 
 // Check if user is enrolled in a course
 export const checkUserEnrollment = async (userId, courseId) => {

@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { UserCollection } from "./auth.model.js";
+import { UserCollection } from "../../models/auth.js";
 
 export const authService = {
   async registerOrLoginSocial({ name, email, provider }) {
