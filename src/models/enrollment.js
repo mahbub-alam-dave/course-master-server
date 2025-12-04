@@ -1,4 +1,7 @@
-import { client } from "../helpers/dbConnect.js";
 
-export const enrollmentCollection = () =>
-  client.db("courseMaster").collection("enrollmentStatistics");
+import { getDb } from "../helpers/dbConnect.js";
+
+export const enrollCollection = () => {
+  const db = getDb();
+  return db.collection("enrollmentStatistics");
+};
