@@ -49,7 +49,7 @@ export const getCourseById = async (req, res) => {
 export const getAllCourses = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 9;
+    const limit = parseInt(req.query.limit) || 4;
     const category = req.query.category || '';
     const level = req.query.level || '';
     const search = req.query.search || '';

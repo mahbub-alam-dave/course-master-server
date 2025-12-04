@@ -59,11 +59,11 @@ export const fetchAllCourses = async ({ page, limit, category, level, search }) 
     // Fetch courses with pagination
     const coursesCollection = CourseCollection()
     const courses = await coursesCollection.find(filter)
-      .select('-sections -description') // Exclude heavy fields for list view
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+  .project({ sections: 0, description: 0 }) // exclude fields
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit)
+  .toArray(); // convert cursor to array
 
     // Get total count for pagination
     const totalCourses = await coursesCollection.countDocuments(filter);
