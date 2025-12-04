@@ -4,6 +4,7 @@ import config from "./config/config.js";
 import { dbConnect } from "./helpers/dbConnect.js";
 import { authRoutes } from "./modules/authentication/auth.routes.js";
 import {coursesRoutes} from "./modules/courses/courses.routes.js"
+import enrollmentRoutes from "./modules/enrollment/enrollment.routes.js"
 
 const app = express();
 const port = config.port || 5000
@@ -18,6 +19,7 @@ app.use(cors({
 
 app.use("/api/auth", authRoutes)
 app.use('/api/courses', coursesRoutes);
+app.use("/api/enrollments", enrollmentRoutes)
 
 app.get("/", (req, res) => {
   res.send("🎓 Courser Master API is running...");
