@@ -3,18 +3,20 @@ import config from "../../config/config.js";
 import { paymentsCollection } from '../../models/payment.js';
 import { enrollmentCollection } from '../../models/enrollment.js';
 import { CourseCollection } from '../../models/courses.js';
+import { ObjectId } from 'mongodb';
 
 const stripe = new Stripe(config.stripeSecretKey);
-const paymentCol = paymentsCollection();
-const enrollStatistics = enrollmentCollection();
-const courseCol = CourseCollection()
+  // Collections
+  const enrollCollection = enrollmentCollection(); // Already defined as native collection
+  const courseCollection = CourseCollection();
+  const paymentCollection = paymentsCollection();
 
 // Create Stripe payment intent
 export const createStripePaymentIntent = async ({ userId, courseId, amount, currency }) => {
 
   try {
     // Check if user is already enrolled
-    const existingEnrollment = await enrollStatistics.findOne({
+    const existingEnrollment = await enrollCollection.findOne({
       'user.userId': userId,
       'course.courseId': courseId,
       enrollmentStatus: 'active'
@@ -52,24 +54,27 @@ export const processPaymentConfirmation = async ({
   paymentIntent
 }) => {
   try {
-    // Check if already enrolled
-    const existingEnrollment = await enrollStatistics.findOne({
-      'user.userId': userId,
-      'course.courseId': courseId
+    // Convert courseId to ObjectId
+    const courseObjectId = new ObjectId(courseId);
+
+    // Check existing enrollment
+    const existingEnrollment = await enrollCollection.findOne({
+      "user.userId": userId,
+      "course.courseId": courseId
     });
 
     if (existingEnrollment) {
-      throw new Error('You are already enrolled in this course');
+      throw new Error("You are already enrolled in this course");
     }
 
     // Fetch course details
-    const course = await courseCol.findById(courseId);
+    const course = await courseCollection.findOne({ _id: courseObjectId });
     if (!course) {
-      throw new Error('Course not found');
+      throw new Error("Course not found");
     }
 
     // Create payment record
-    const payment = await paymentCol.create({
+    const paymentData = {
       user: {
         userId,
         name: userName,
@@ -80,16 +85,18 @@ export const processPaymentConfirmation = async ({
         title: course.title,
         thumbnail: course.thumbnail
       },
-      amount: paymentIntent.amount / 100, // Convert from cents
+      amount: paymentIntent.amount / 100,
       currency: paymentIntent.currency.toUpperCase(),
       stripePaymentIntentId: paymentIntent.id,
       stripeCustomerId: paymentIntent.customer || null,
-      status: 'succeeded',
+      status: "succeeded",
       paymentDate: new Date()
-    });
+    };
+
+    const paymentResult = await paymentCollection.insertOne(paymentData);
 
     // Create enrollment record
-    const enrollment = await enrollStatistics.create({
+    const enrollmentData = {
       user: {
         userId,
         name: userName,
@@ -106,12 +113,12 @@ export const processPaymentConfirmation = async ({
         thumbnail: course.thumbnail
       },
       payment: {
-        paymentId: payment._id,
-        amount: payment.amount,
-        currency: payment.currency
+        paymentId: paymentResult.insertedId,
+        amount: paymentData.amount,
+        currency: paymentData.currency
       },
       enrollmentDate: new Date(),
-      enrollmentStatus: 'active',
+      enrollmentStatus: "active",
       progress: {
         completedLectures: 0,
         totalLectures: course.totalLectures || 0,
@@ -123,21 +130,25 @@ export const processPaymentConfirmation = async ({
         issued: false
       },
       accessExpiry: {
-        hasExpiry: course.accessType === 'subscription',
-        expiryDate: course.accessType === 'subscription' 
-          ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
-          : null
+        hasExpiry: course.accessType === "subscription",
+        expiryDate:
+          course.accessType === "subscription"
+            ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+            : null
       }
-    });
+    };
+
+    const enrollmentResult = await enrollCollection.insertOne(enrollmentData);
 
     // Update course enrollment count
-    await courseCol.findByIdAndUpdate(courseId, {
-      $inc: { enrollmentCount: 1 }
-    });
+    await courseCollection.updateOne(
+      { _id: courseObjectId },
+      { $inc: { enrollmentCount: 1 } }
+    );
 
     return {
-      payment,
-      enrollment
+      payment: paymentResult,
+      enrollment: enrollmentResult
     };
   } catch (error) {
     throw new Error(`Error processing payment: ${error.message}`);
