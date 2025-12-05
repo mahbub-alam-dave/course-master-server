@@ -141,7 +141,7 @@ export const processPaymentConfirmation = async ({
     const enrollmentResult = await enrollCollection.insertOne(enrollmentData);
 
     // Update course enrollment count
-    await courseCollection.updateOne(
+    await courseCollections.updateOne(
       { _id: courseObjectId },
       { $inc: { enrollmentCount: 1 } }
     );
