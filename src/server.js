@@ -27,21 +27,11 @@ app.get("/", (req, res) => {
   res.send("🎓 Courser Master API is running...");
 });
 
-// Start server only after DB connects
-/* const startServer = async () => {
-  try {
-    await dbConnect();
-    app.listen(port, () => {
-      console.log(`🚀 Server is running on port ${port}`);
-    });
-  } catch (error) {
-    console.error("❌ Failed to start server:", error);
-    process.exit(1); // Stop the app
-  }
-};
 
-startServer(); */
 
 await dbConnect();
+/* app.listen(port, async() => {
+    console.log(`🚀 Server is running on port ${port}`);
+}); */
 
 export default app;

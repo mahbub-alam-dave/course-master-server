@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { CourseCollection } from "../../models/courses.js";
+import {courseCollection} from "../../models/courses.js";
 
 
 export const fetchRandomCourses = async () => {
@@ -20,7 +20,7 @@ export const fetchRandomCourses = async () => {
 // Fetch single course by ID
 export const fetchCourseById = async (id) => {
   try {
-    const courses = CourseCollection()
+    const courses = courseCollection()
     const course = await courses.findOne({ 
       _id: new ObjectId(id), 
       status: 'published' 

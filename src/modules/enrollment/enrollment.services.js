@@ -1,4 +1,4 @@
-import { enrollmentCollection } from "../../models/enrollment.js";
+import {enrollmentCollection}  from "../../models/enrollment.js";
 
 
 // Check if user is enrolled in a course

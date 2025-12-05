@@ -1,14 +1,14 @@
 import Stripe from 'stripe';
 import config from "../../config/config.js";
-import { paymentsCollection } from '../../models/payment.js';
-import { enrollmentCollection } from '../../models/enrollment.js';
-import { CourseCollection } from '../../models/courses.js';
+import {paymentsCollection} from '../../models/payment.js';
+import {enrollmentCollection} from '../../models/enrollment.js';
+import {courseCollection}  from '../../models/courses.js';
 import { ObjectId } from 'mongodb';
 
 const stripe = new Stripe(config.stripeSecretKey);
   // Collections
   const enrollCollection = enrollmentCollection(); // Already defined as native collection
-  const courseCollection = CourseCollection();
+  const courseCollections = courseCollection();
   const paymentCollection = paymentsCollection();
 
 // Create Stripe payment intent
@@ -68,7 +68,7 @@ export const processPaymentConfirmation = async ({
     }
 
     // Fetch course details
-    const course = await courseCollection.findOne({ _id: courseObjectId });
+    const course = await courseCollections.findOne({ _id: courseObjectId });
     if (!course) {
       throw new Error("Course not found");
     }
