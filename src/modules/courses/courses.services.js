@@ -4,7 +4,7 @@ import {courseCollection} from "../../models/courses.js";
 
 export const fetchRandomCourses = async () => {
   try {
-    const courses = CourseCollection()
+    const courses = courseCollection()
 
     const randomCourses = await courses.aggregate([
       { $match: { status: 'published' } },
@@ -57,7 +57,7 @@ export const fetchAllCourses = async ({ page, limit, category, level, search }) 
     }
 
     // Fetch courses with pagination
-    const coursesCollection = CourseCollection()
+    const coursesCollection = courseCollection()
     const courses = await coursesCollection.find(filter)
   .project({ sections: 0, description: 0 }) // exclude fields
   .sort({ createdAt: -1 })
