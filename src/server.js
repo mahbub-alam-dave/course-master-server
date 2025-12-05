@@ -13,7 +13,7 @@ const port = config.port || 5000
 app.use(express.json());
 // app.use(express.urlencoded());
 app.use(cors({
-  origin: ["http://localhost:5173", "https://course-master-client-m2ka.vercel.app"],
+  origin: ["http://localhost:5173", "http://localhost:3000", "https://course-master-client-m2ka.vercel.app"],
   credentials: true
 }));
 
@@ -29,9 +29,6 @@ app.get("/", (req, res) => {
 
 
 
-await dbConnect();
-/* app.listen(port, async() => {
-    console.log(`🚀 Server is running on port ${port}`);
-}); */
+// await dbConnect();
 
 export default app;

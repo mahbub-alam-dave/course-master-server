@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import {enrollmentCollection}  from "../../models/enrollment.js";
 
 
@@ -7,7 +8,7 @@ export const checkUserEnrollment = async (userId, courseId) => {
     const enrollmentStatistics = enrollmentCollection()
     const enrollment = await enrollmentStatistics.findOne({
       'user.userId': userId,
-      'course.courseId': courseId,
+      'course.courseId': new ObjectId(courseId),
       enrollmentStatus: 'active'
     });
 
