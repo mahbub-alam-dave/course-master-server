@@ -10,7 +10,7 @@ export const handler = serverless(app);
 export default handler;
 
 // Start server only after DB connects
-/* const startServer = async () => {
+const startServer = async () => {
   try {
     await dbConnect();
     app.listen(port, () => {
@@ -22,4 +22,4 @@ export default handler;
   }
 };
 
-startServer(); */
+startServer();
