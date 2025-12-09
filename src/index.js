@@ -6,11 +6,11 @@ import config from "./config/config.js";
 
 const port = config.port || 5000
 
-/* export const handler = serverless(app);
-export default handler; */
+export const handler = serverless(app);
+export default handler;
 
 // Start server only after DB connects
-const startServer = async () => {
+/* const startServer = async () => {
   try {
     await dbConnect();
     app.listen(port, () => {
@@ -22,4 +22,4 @@ const startServer = async () => {
   }
 };
 
-startServer();
+startServer(); */
