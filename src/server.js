@@ -29,6 +29,6 @@ app.get("/", (req, res) => {
 
 
 
-// await dbConnect();
+await dbConnect();
 
 export default app;

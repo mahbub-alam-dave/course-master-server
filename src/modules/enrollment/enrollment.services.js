@@ -49,3 +49,74 @@ export const fetchUserEnrollments = async ({ userId, page, limit, status }) => {
     throw new Error(`Error fetching enrollments: ${error.message}`);
   }
 };
+
+
+// / Update course progress
+export const updateCourseProgress = async ({ enrollmentId, userId, progressData }) => {
+  const enrollmentStatistics = enrollmentCollection();
+
+  try {
+    // Convert enrollmentId to ObjectId
+    const _id = new ObjectId(enrollmentId);
+
+    // Get the existing enrollment document
+    const enrollment = await enrollmentStatistics.findOne({
+      _id,
+      'user.userId': userId
+    });
+
+    if (!enrollment) {
+      throw new Error('Enrollment not found');
+    }
+
+    // Prepare update object
+    const updateFields = {};
+
+    // Update completed lectures
+    if (progressData.completedLectures !== undefined) {
+      updateFields['progress.completedLectures'] = progressData.completedLectures;
+    }
+
+    // Push completed section
+    const updateOperators = {};
+    if (progressData.completedSections) {
+      updateOperators.$push = {
+        'progress.completedSections': {
+          sectionId: progressData.completedSections.sectionId,
+          completedDate: new Date(),
+        }
+      };
+    }
+
+    // Recalculate completion percentage
+    const totalLectures = enrollment.progress.totalLectures || 0;
+    const completedLectures = progressData.completedLectures ?? enrollment.progress.completedLectures;
+
+    if (totalLectures > 0) {
+      updateFields['progress.completionPercentage'] = Math.round((completedLectures / totalLectures) * 100);
+    }
+
+    updateFields['progress.lastAccessedDate'] = new Date();
+
+    // Course completion check
+    if (updateFields['progress.completionPercentage'] === 100) {
+      updateFields['enrollmentStatus'] = 'completed';
+    }
+
+    // Apply update
+    await enrollmentStatistics.updateOne(
+      { _id },
+      {
+        $set: updateFields,
+        ...(updateOperators.$push ? { $push: updateOperators.$push } : {})
+      }
+    );
+
+    // Return updated document
+    const updatedEnrollment = await enrollmentStatistics.findOne({ _id });
+    return updatedEnrollment;
+
+  } catch (error) {
+    throw new Error(`Error updating progress: ${error.message}`);
+  }
+};
