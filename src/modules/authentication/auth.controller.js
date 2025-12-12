@@ -5,6 +5,7 @@ import { generateToken } from "../../helpers/token.js";
 
 
 const CLIENT_URL = config.clientUrl; // your frontend URL
+const SERVER_URL = config.serverUrl; // your frontend URL
 
 export const authController = {
   // ----- CREDENTIALS -----
@@ -34,7 +35,7 @@ export const authController = {
   googleAuth: (req, res) => {
     const redirect =
       `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.googleClient}` +
-      `&redirect_uri=${CLIENT_URL}/api/auth/google/callback` +
+      `&redirect_uri=${SERVER_URL}/api/auth/google/callback` +
       `&response_type=code&scope=openid email profile`;
 
     res.redirect(redirect);
@@ -49,7 +50,7 @@ export const authController = {
         code,
         client_id: config.googleClient,
         client_secret: config.googleSecret,
-        redirect_uri: `${CLIENT_URL}/api/auth/google/callback`,
+        redirect_uri: `${SERVER_URL}/api/auth/google/callback`,
         grant_type: "authorization_code",
       }
     );
@@ -74,11 +75,13 @@ export const authController = {
   },
 
   // ----- GITHUB LOGIN -----
-  githubAuth: (req, res) => {
-    res.redirect(
-      `https://github.com/login/oauth/authorize?client_id=${config.githubClient}&scope=user:email`
-    );
-  },
+githubAuth: (req, res) => {
+  res.redirect(
+    `https://github.com/login/oauth/authorize?client_id=${config.githubClient}` +
+    `&redirect_uri=${config.serverUrl}/api/auth/github/callback` +
+    `&scope=user:email`
+  );
+},
 
   githubCallback: async (req, res) => {
     const { code } = req.query;
@@ -89,6 +92,7 @@ export const authController = {
         client_id: config.githubClient,
         client_secret: config.githubSecret,
         code,
+        redirect_uri: `${config.serverUrl}/api/auth/github/callback`
       },
       { headers: { Accept: "application/json" } }
     );

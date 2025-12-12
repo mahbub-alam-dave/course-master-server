@@ -9,6 +9,7 @@ const config = {
     githubClient: process.env.GITHUB_CLIENT_ID,
     githubSecret: process.env.GITHUB_CLIENT_SECRET,
     clientUrl: process.env.CLIENT_URL,
+    serverUrl: process.env.SERVER_URL,
     jwtSecret: process.env.JWT_SECRET,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
 }
