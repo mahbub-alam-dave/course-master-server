@@ -34,7 +34,7 @@ export const authController = {
   googleAuth: (req, res) => {
     const redirect =
       `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.googleClient}` +
-      `&redirect_uri=http://localhost:5000/api/auth/google/callback` +
+      `&redirect_uri=${CLIENT_URL}/api/auth/google/callback` +
       `&response_type=code&scope=openid email profile`;
 
     res.redirect(redirect);
@@ -49,7 +49,7 @@ export const authController = {
         code,
         client_id: config.googleClient,
         client_secret: config.googleSecret,
-        redirect_uri: "http://localhost:5000/api/auth/google/callback",
+        redirect_uri: `${CLIENT_URL}/api/auth/google/callback`,
         grant_type: "authorization_code",
       }
     );
