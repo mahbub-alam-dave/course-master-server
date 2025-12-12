@@ -52,4 +52,4 @@ export const requireAdmin = (req, res, next) => {
       message: 'Access denied. Admin privileges required.'
     });
   }
-};
+}; 
