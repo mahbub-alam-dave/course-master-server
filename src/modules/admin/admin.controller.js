@@ -1,4 +1,4 @@
-import { fetchDashboardStats } from "./admin.services.js";
+import { fetchDashboardStats, fetchRecentEnrollments } from "./admin.services.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -15,6 +15,27 @@ export const getDashboardStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch dashboard stats',
+      error: error.message
+    });
+  }
+};
+
+// / Get recent enrollments
+export const getRecentEnrollments = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    const enrollments = await fetchRecentEnrollments(limit);
+
+    res.status(200).json({
+      success: true,
+      data: enrollments
+    });
+  } catch (error) {
+    console.error('Error fetching recent enrollments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch recent enrollments',
       error: error.message
     });
   }

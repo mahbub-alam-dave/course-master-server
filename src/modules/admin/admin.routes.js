@@ -1,6 +1,6 @@
 import express from "express"
 import { authenticateUser, requireAdmin } from "../../middleware/auth.middleware.js";
-import { getDashboardStats } from "./admin.controller.js";
+import { getDashboardStats, getRecentEnrollments } from "./admin.controller.js";
 
 const router = express.Router()
 
@@ -9,5 +9,7 @@ router.use(authenticateUser, requireAdmin);
 
 // Dashboard overview stats
 router.get('/stats', getDashboardStats);
+// recent enrollments
+router.get('/recent-enrollments', getRecentEnrollments);
 
 export const adminRoutes = router;

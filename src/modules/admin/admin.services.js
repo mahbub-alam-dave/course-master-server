@@ -138,3 +138,17 @@ const totalInstructors = instructorsResult[0]?.totalInstructors || 0;
     throw new Error(`Error fetching dashboard stats: ${error.message}`);
   }
 };
+
+// recent enrollments
+export const fetchRecentEnrollments = async (limit) => {
+  try {
+    const enrollments = await EnrollStatistics.find()
+      .sort({ enrollmentDate: -1 })
+      .limit(limit)
+      .toArray();
+
+    return enrollments;
+  } catch (error) {
+    throw new Error(`Error fetching recent enrollments: ${error.message}`);
+  }
+};
