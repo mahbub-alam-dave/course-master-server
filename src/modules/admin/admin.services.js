@@ -152,3 +152,39 @@ export const fetchRecentEnrollments = async (limit) => {
     throw new Error(`Error fetching recent enrollments: ${error.message}`);
   }
 };
+
+// Fetch top performing courses
+export const fetchTopCourses = async (limit) => {
+  try {
+    const topCourses = await EnrollStatistics.aggregate([
+      {
+        $group: {
+          _id: '$course.courseId',
+          title: { $first: '$course.title' },
+          enrollments: { $sum: 1 },
+          totalRevenue: { $sum: '$payment.amount' },
+          avgCompletion: { $avg: '$progress.completionPercentage' }
+        }
+      },
+      {
+        $sort: { enrollments: -1 }
+      },
+      {
+        $limit: limit
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          enrollments: 1,
+          revenue: '$totalRevenue',
+          completionRate: { $round: ['$avgCompletion', 0] }
+        }
+      }
+    ]).toArray();
+
+    return topCourses;
+  } catch (error) {
+    throw new Error(`Error fetching top courses: ${error.message}`);
+  }
+};
