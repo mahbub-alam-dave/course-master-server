@@ -1,4 +1,4 @@
-import { fetchDashboardStats, fetchRecentEnrollments, fetchTopCourses } from "./admin.services.js";
+import { fetchDashboardStats, fetchRecentEnrollments, fetchRevenueChart, fetchTopCourses } from "./admin.services.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -58,6 +58,27 @@ export const getTopCourses = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch top courses',
+      error: error.message
+    });
+  }
+};
+
+// Get revenue chart data
+export const getRevenueChart = async (req, res) => {
+  try {
+    const { dateRange = 'month' } = req.query;
+
+    const revenueData = await fetchRevenueChart(dateRange);
+
+    res.status(200).json({
+      success: true,
+      data: revenueData
+    });
+  } catch (error) {
+    console.error('Error fetching revenue chart:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch revenue chart',
       error: error.message
     });
   }

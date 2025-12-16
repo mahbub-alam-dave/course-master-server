@@ -1,6 +1,6 @@
 import express from "express"
 import { authenticateUser, requireAdmin } from "../../middleware/auth.middleware.js";
-import { getDashboardStats, getRecentEnrollments, getTopCourses } from "./admin.controller.js";
+import { getDashboardStats, getRecentEnrollments, getRevenueChart, getTopCourses } from "./admin.controller.js";
 
 const router = express.Router()
 
@@ -13,5 +13,7 @@ router.get('/stats', getDashboardStats);
 router.get('/recent-enrollments', getRecentEnrollments);
 // Top performing courses
 router.get('/top-courses', getTopCourses);
+// Revenue chart data
+router.get('/revenue-chart', getRevenueChart);
 
 export const adminRoutes = router;
