@@ -1,6 +1,6 @@
 import express from "express"
 import { authenticateUser, requireAdmin } from "../../middleware/auth.middleware.js";
-import { getDashboardStats, getRecentEnrollments, getRevenueChart, getTopCourses } from "./admin.controller.js";
+import { getAllUsers, getCourseAnalytics, getDashboardStats, getRecentEnrollments, getRevenueChart, getTopCourses } from "./admin.controller.js";
 
 const router = express.Router()
 
@@ -15,5 +15,9 @@ router.get('/recent-enrollments', getRecentEnrollments);
 router.get('/top-courses', getTopCourses);
 // Revenue chart data
 router.get('/revenue-chart', getRevenueChart);
+// User management
+router.get('/users', getAllUsers);
+// Course-specific analytics
+router.get('/course-analytics/:courseId', getCourseAnalytics);
 
 export const adminRoutes = router;

@@ -7,6 +7,7 @@ import {coursesRoutes} from "./modules/courses/courses.routes.js"
 import enrollmentRoutes from "./modules/enrollment/enrollment.routes.js"
 import paymentRoutes from "./modules/payment/payment.routes.js"
 import { adminRoutes } from "./modules/admin/admin.routes.js";
+import { instructorApplication } from "./modules/instructorApplication/instructorApplication.routes.js";
 
 const app = express();
 const port = config.port || 5000
@@ -24,6 +25,7 @@ app.use('/api/courses', coursesRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/instructor-applications', instructorApplication)
 
 app.get("/", (req, res) => {
   res.send("🎓 Courser Master API is running...");

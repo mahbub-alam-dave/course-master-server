@@ -1,4 +1,4 @@
-import { fetchDashboardStats, fetchRecentEnrollments, fetchRevenueChart, fetchTopCourses } from "./admin.services.js";
+import { fetchAllUsers, fetchCourseAnalytics, fetchDashboardStats, fetchRecentEnrollments, fetchRevenueChart, fetchTopCourses } from "./admin.services.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -79,6 +79,58 @@ export const getRevenueChart = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch revenue chart',
+      error: error.message
+    });
+  }
+};
+
+
+// Get all users for user management
+export const getAllUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const role = req.query.role || 'all';
+
+    const result = await fetchAllUsers({ page, limit, role });
+
+    res.status(200).json({
+      success: true,
+      data: result.users,
+      pagination: {
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        totalUsers: result.totalUsers,
+        limit: result.limit
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users',
+      error: error.message
+    });
+  }
+};
+
+
+// Get analytics for specific course
+export const getCourseAnalytics = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const analytics = await fetchCourseAnalytics(courseId);
+
+    res.status(200).json({
+      success: true,
+      data: analytics
+    });
+  } catch (error) {
+    console.error('Error fetching course analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch course analytics',
       error: error.message
     });
   }

@@ -2,6 +2,7 @@ import { UserCollection } from "../../models/auth.js";
 import {paymentsCollection} from '../../models/payment.js';
 import {enrollmentCollection} from '../../models/enrollment.js';
 import {courseCollection}  from '../../models/courses.js';
+import { ObjectId } from "mongodb";
 
 const getDateFilter = (dateRange) => {
   const now = new Date();
@@ -32,6 +33,7 @@ const getDateFilter = (dateRange) => {
 const EnrollStatistics = enrollmentCollection();
 const Payment = paymentsCollection();
 const Course = courseCollection();
+const User = UserCollection()
 
 // Fetch dashboard overview stats (MongoDB Native)
 export const fetchDashboardStats = async ({ dateRange, courseId }) => {
@@ -293,6 +295,134 @@ export const fetchRevenueChart = async (dateRange) => {
     return formattedData;
   } catch (error) {
     throw new Error(`Error fetching revenue chart: ${error.message}`);
+  }
+};
+
+
+// Fetch all users
+export const fetchAllUsers = async ({ page = 1, limit = 10, role }) => {
+  try {
+    // const User = usersCollection(); // native collection
+
+    const skip = (page - 1) * limit;
+    const filter = role && role !== "all" ? { role } : {};
+
+    // Fetch users (exclude password)
+    const users = await User
+      .find(filter, { projection: { password: 0 } })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const totalUsers = await User.countDocuments(filter);
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    return {
+      users,
+      currentPage: page,
+      totalPages,
+      totalUsers,
+      limit,
+    };
+  } catch (error) {
+    throw new Error(`Error fetching users: ${error.message}`);
+  }
+};
+
+
+// Fetch analytics for specific course
+export const fetchCourseAnalytics = async (courseId) => {
+  try {
+    const EnrollStatistics = enrollmentCollection(); // native collection
+    const Payment = paymentsCollection();             // native collection
+
+    // 1️⃣ Total Enrollments
+    const totalEnrollments = await EnrollStatistics.countDocuments({
+      "course.courseId": new ObjectId(courseId),
+    });
+
+    // 2️⃣ Active vs Completed breakdown
+    const statusBreakdown = await EnrollStatistics.aggregate([
+      {
+        $match: { "course.courseId": new ObjectId(courseId) },
+      },
+      {
+        $group: {
+          _id: "$enrollmentStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ]).toArray();
+
+    // 3️⃣ Total Revenue
+    const revenueResult = await Payment.aggregate([
+      {
+        $match: {
+          "course.courseId": new ObjectId(courseId),
+          status: "succeeded",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]).toArray();
+
+    const totalRevenue = revenueResult[0]?.total || 0;
+
+    // 4️⃣ Average Completion Percentage
+    const completionResult = await EnrollStatistics.aggregate([
+      {
+        $match: { "course.courseId": new ObjectId(courseId) },
+      },
+      {
+        $group: {
+          _id: null,
+          avgCompletion: { $avg: "$progress.completionPercentage" },
+        },
+      },
+    ]).toArray();
+
+    const avgCompletion = Math.round(
+      completionResult[0]?.avgCompletion || 0
+    );
+
+    // 5️⃣ Average Rating & Total Reviews
+    const ratingResult = await EnrollStatistics.aggregate([
+      {
+        $match: {
+          "course.courseId": new ObjectId(courseId),
+          "rating.stars": { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating.stars" },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]).toArray();
+
+    const avgRating = Number(
+      ratingResult[0]?.avgRating?.toFixed(1) || 0
+    );
+    const totalReviews = ratingResult[0]?.totalReviews || 0;
+
+    console.log(totalEnrollments, totalRevenue)
+    return {
+      totalEnrollments,
+      statusBreakdown,
+      totalRevenue,
+      avgCompletion,
+      avgRating,
+      totalReviews,
+    };
+  } catch (error) {
+    throw new Error(`Error fetching course analytics: ${error.message}`);
   }
 };
 
