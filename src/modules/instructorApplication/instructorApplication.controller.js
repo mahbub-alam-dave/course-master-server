@@ -1,4 +1,4 @@
-import { createApplication } from "./instructorApplication.services.js";
+import { createApplication, fetchAllApplications } from "./instructorApplication.services.js";
 
 // Submit instructor application
 export const submitApplication = async (req, res) => {
@@ -33,6 +33,35 @@ export const submitApplication = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+};
+
+// Get all applications (Admin)
+export const getAllApplications = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const status = req.query.status || 'all';
+
+    const result = await fetchAllApplications({ page, limit, status });
+
+    res.status(200).json({
+      success: true,
+      data: result.applications,
+      pagination: {
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        totalApplications: result.totalApplications,
+        limit: result.limit
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch applications',
+      error: error.message
     });
   }
 };

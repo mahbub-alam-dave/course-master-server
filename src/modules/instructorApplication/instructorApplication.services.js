@@ -61,3 +61,33 @@ export const createApplication = async ({
     throw new Error(`Error creating application: ${error.message}`);
   }
 };
+
+
+
+// Fetch all applications
+export const fetchAllApplications = async ({ page, limit, status }) => {
+  try {
+    const skip = (page - 1) * limit;
+    
+    const filter = status !== 'all' ? { status } : {};
+
+    const applications = await InstructorApplication.find(filter)
+      .sort({ appliedDate: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const totalApplications = await InstructorApplication.countDocuments(filter);
+    const totalPages = Math.ceil(totalApplications / limit);
+
+    return {
+      applications,
+      currentPage: page,
+      totalPages,
+      totalApplications,
+      limit
+    };
+  } catch (error) {
+    throw new Error(`Error fetching applications: ${error.message}`);
+  }
+};
