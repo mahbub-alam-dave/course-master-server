@@ -91,3 +91,54 @@ export const fetchAllApplications = async ({ page, limit, status }) => {
     throw new Error(`Error fetching applications: ${error.message}`);
   }
 };
+
+
+// Approve application
+export const approveInstructorApplication = async ({
+  applicationId,
+  adminId,
+  adminName
+}) => {
+  try {
+    const application = await InstructorApplication.findById(applicationId);
+
+    if (!application) {
+      throw new Error('Application not found');
+    }
+
+    if (application.status === 'approved') {
+      throw new Error('Application has already been approved');
+    }
+
+    // Generate instructor ID
+    const instructorId = `inst_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Update user role and add instructor details
+    await User.findByIdAndUpdate(application.user.userId, {
+      role: 'instructor',
+      instructorId: instructorId,
+      instructorProfile: {
+        bio: application.bio,
+        title: application.title,
+        expertise: application.expertise,
+        socialLinks: application.socialLinks
+      }
+    });
+
+    // Update application status
+    application.status = 'approved';
+    application.reviewedBy = {
+      adminId,
+      adminName,
+      reviewDate: new Date()
+    };
+    await application.save();
+
+    return {
+      application,
+      instructorId
+    };
+  } catch (error) {
+    throw new Error(`Error approving application: ${error.message}`);
+  }
+};

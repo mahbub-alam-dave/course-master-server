@@ -65,3 +65,30 @@ export const getAllApplications = async (req, res) => {
     });
   }
 };
+
+// Approve application (Admin)
+export const approveApplication = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const adminId = req.user.id;
+    const adminName = req.user.name;
+
+    const result = await approveInstructorApplication({
+      applicationId,
+      adminId,
+      adminName
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Application approved successfully! User is now an instructor.',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error approving application:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
