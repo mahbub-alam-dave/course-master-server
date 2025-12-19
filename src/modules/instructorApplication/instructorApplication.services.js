@@ -142,3 +142,36 @@ export const approveInstructorApplication = async ({
     throw new Error(`Error approving application: ${error.message}`);
   }
 };
+
+
+// Reject application
+export const rejectInstructorApplication = async ({
+  applicationId,
+  adminId,
+  adminName,
+  reason
+}) => {
+  try {
+    const application = await InstructorApplication.findByIdAndUpdate(
+      applicationId,
+      {
+        status: 'rejected',
+        rejectionReason: reason,
+        reviewedBy: {
+          adminId,
+          adminName,
+          reviewDate: new Date()
+        }
+      },
+      { new: true }
+    );
+
+    if (!application) {
+      throw new Error('Application not found');
+    }
+
+    return application;
+  } catch (error) {
+    throw new Error(`Error rejecting application: ${error.message}`);
+  }
+};

@@ -92,3 +92,40 @@ export const approveApplication = async (req, res) => {
     });
   }
 };
+
+
+// Reject application (Admin)
+export const rejectApplication = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user.id;
+    const adminName = req.user.name;
+
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rejection reason is required'
+      });
+    }
+
+    const application = await rejectInstructorApplication({
+      applicationId,
+      adminId,
+      adminName,
+      reason
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Application rejected',
+      data: application
+    });
+  } catch (error) {
+    console.error('Error rejecting application:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
